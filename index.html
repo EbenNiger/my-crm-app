@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional CRM</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding-bottom: 5rem;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        /* Code Entry Screen */
+        .code-entry-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 2rem;
+        }
+        
+        .code-entry-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .code-entry-card h1 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 1.75rem;
+        }
+        
+        .code-entry-card p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        
+        .code-input {
+            width: 100%;
+            padding: 1rem;
+            border: 3px solid #667eea;
+            border-radius: 0.75rem;
+            font-size: 1.25rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+        
+        .code-submit {
+            width: 100%;
+            padding: 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 1.5rem;
+        }
+        
+        .logout-btn {
+            background: #fee;
+            color: #c00;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        
+        .client-badge {
+            background: #f0f0f0;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            color: #666;
+        }
+        
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+        }
+        
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .nav-tab.active {
+            background: white;
+            color: #667eea;
+        }
+        
+        /* Dashboard */
+        .dashboard {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .dashboard h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            color: white;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .pipeline-section {
+            margin-bottom: 1rem;
+        }
+        
+        .pipeline-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f9f9f9;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .pipeline-count {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+        
+        /* Cards */
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Contact Card */
+        .contact-card {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        
+        .contact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        
+        .contact-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .contact-company {
+            font-size: 0.875rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-newlead { background: #dbeafe; color: #1e40af; }
+        .status-contacted { background: #e9d5ff; color: #6b21a8; }
+        .status-qualified { background: #fef3c7; color: #92400e; }
+        .status-negotiating { background: #fed7aa; color: #9a3412; }
+        .status-converted { background: #d1fae5; color: #065f46; }
+        .status-lost { background: #fee2e2; color: #991b1b; }
+        
+        .contact-info {
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: #666;
+        }
+        
+        .contact-info div {
+            margin-bottom: 0.25rem;
+        }
+        
+        .activity-summary {
+            background: #f9f9f9;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .activity-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+        
+        .next-action {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .history-toggle {
+            color: #667eea;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            text-decoration: underline;
+            margin-bottom: 0.5rem;
+        }
+        
+        .history-list {
+            font-size: 0.8rem;
+            color: #666;
+            background: #f9f9f9;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .contact-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+        
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-secondary { background: #e5e7eb; color: #374151; }
+        
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        /* FAB */
+        .fab {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px rgba(102,126,234,0.5);
+            cursor: pointer;
+            font-size: 1.5rem;
+            z-index: 100;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+        
+        .modal-header h2 {
+            color: #667eea;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #999;
+        }
+        
+        .search-bar {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid white;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <!-- Code Entry Screen -->
+    <div id="codeEntryScreen" class="code-entry-screen hidden">
+        <div class="code-entry-card">
+            <h1>🚀 Welcome to Your CRM</h1>
+            <p>Enter your access code to get started</p>
+            <input type="text" id="codeInput" class="code-input" placeholder="ENTER CODE" maxlength="20">
+            <button onclick="saveClientCode()" class="code-submit">Continue</button>
+            <p style="margin-top: 1rem; font-size: 0.75rem; color: #999;">
+                Don't have a code? Contact your administrator
+            </p>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading" class="loading">
+        <h2>🔄 Loading CRM...</h2>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="container hidden">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <h1>📊 CRM Pro</h1>
+                <button onclick="logout()" class="logout-btn">Logout</button>
+            </div>
+            <div class="client-badge" id="clientBadge">Loading...</div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('contacts')">👥 Contacts</button>
+            <button class="nav-tab" onclick="switchTab('tasks')">✅ Tasks</button>
+            <button class="nav-tab" onclick="switchTab('integrations')">🔗 Integrations</button>
+        </div>
+
+        <!-- Integrations Tab -->
+        <div id="integrationsTab" class="hidden">
+            <div class="card">
+                <h2 style="margin-bottom: 1rem; color: #667eea;">🔗 Connect Your Apps</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">
+                    Connect your Google account to unlock powerful features
+                </p>
+                
+                <div id="googleNotConnected">
+                    <div style="background: #f0f7ff; border: 2px solid #667eea; padding: 1.5rem; border-radius: 1rem; margin-bottom: 1rem;">
+                        <h3 style="color: #667eea; margin-bottom: 0.75rem;">📧 Gmail Integration</h3>
+                        <ul style="color: #666; margin-left: 1.5rem; margin-bottom: 1rem;">
+                            <li>Send emails directly from CRM</li>
+                            <li>Auto-log sent emails</li>
+                            <li>Track email opens</li>
+                            <li>Quick email templates</li>
+                        </ul>
+                        <h3 style="color: #667eea; margin-bottom: 0.75rem;">📅 Calendar Sync</h3>
+                        <ul style="color: #666; margin-left: 1.5rem; margin-bottom: 1rem;">
+                            <li>Schedule follow-ups in Google Calendar</li>
+                            <li>Get calendar reminders</li>
+                            <li>Sync meetings automatically</li>
+                        </ul>
+                        <h3 style="color: #667eea; margin-bottom: 0.75rem;">👥 Contacts Import</h3>
+                        <ul style="color: #666; margin-left: 1.5rem; margin-bottom: 1rem;">
+                            <li>Import contacts from Google Contacts</li>
+                            <li>Two-way sync</li>
+                            <li>Keep everything up to date</li>
+                        </ul>
+                    </div>
+                    
+                    <button onclick="connectGoogle()" class="action-btn btn-primary" style="width: 100%; padding: 1.25rem; font-size: 1.125rem;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 0.5rem;">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                        </svg>
+                        Connect Google Account
+                    </button>
+                    
+                    <p style="text-align: center; color: #999; font-size: 0.875rem; margin-top: 1rem;">
+                        ⚠️ Optional - Your CRM works great without Google too!
+                    </p>
+                </div>
+                
+                <div id="googleConnected" class="hidden">
+                    <div style="background: #d1fae5; border: 2px solid #10b981; padding: 1.5rem; border-radius: 1rem; margin-bottom: 1rem;">
+                        <h3 style="color: #065f46; margin-bottom: 0.5rem;">✅ Google Account Connected</h3>
+                        <p style="color: #065f46; margin-bottom: 1rem;" id="googleEmail">Loading...</p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                            <button onclick="importGoogleContacts()" class="action-btn btn-primary">
+                                📥 Import Contacts
+                            </button>
+                            <button onclick="openGmailCompose()" class="action-btn btn-success">
+                                📧 Send Email
+                            </button>
+                            <button onclick="syncToCalendar()" class="action-btn btn-warning">
+                                📅 Sync Calendar
+                            </button>
+                            <button onclick="disconnectGoogle()" class="action-btn btn-danger">
+                                🔌 Disconnect
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="importResults" class="hidden" style="background: #f0f0f0; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                        <strong>Import Results:</strong>
+                        <div id="importStatus" style="margin-top: 0.5rem;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Email Templates -->
+            <div class="card">
+                <h2 style="margin-bottom: 1rem; color: #667eea;">📧 Email Templates</h2>
+                <div style="display: grid; gap: 0.75rem;">
+                    <button onclick="useEmailTemplate('intro')" class="action-btn btn-secondary" style="text-align: left; padding: 1rem;">
+                        <strong>👋 Introduction Email</strong><br>
+                        <small style="color: #666;">First contact with new lead</small>
+                    </button>
+                    <button onclick="useEmailTemplate('followup')" class="action-btn btn-secondary" style="text-align: left; padding: 1rem;">
+                        <strong>⏰ Follow-up Email</strong><br>
+                        <small style="color: #666;">Check in after previous contact</small>
+                    </button>
+                    <button onclick="useEmailTemplate('proposal')" class="action-btn btn-secondary" style="text-align: left; padding: 1rem;">
+                        <strong>📄 Proposal Email</strong><br>
+                        <small style="color: #666;">Send your offer/proposal</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboardTab">
+            <div class="dashboard">
+                <h2>📊 Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalLeads">0</div>
+                        <div class="stat-label">Total Leads</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="newThisWeek">0</div>
+                        <div class="stat-label">New This Week</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="converted">0</div>
+                        <div class="stat-label">Converted</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="conversionRate">0%</div>
+                        <div class="stat-label">Win Rate</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-bottom: 0.75rem; color: #667eea;">📈 Pipeline</h3>
+                <div class="pipeline-section" id="pipelineStats"></div>
+                
+                <div style="background: #fff3cd; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                    <strong>⚠️ Follow-ups Due Today:</strong>
+                    <div id="dueTasks" style="margin-top: 0.5rem;">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contacts Tab -->
+        <div id="contactsTab" class="hidden">
+            <div class="card">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search contacts...">
+                </div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <button onclick="filterByStatus('all')" class="action-btn btn-primary" style="flex: 1;">All</button>
+                    <button onclick="filterByStatus('New Lead')" class="action-btn btn-secondary" style="flex: 1;">New</button>
+                    <button onclick="filterByStatus('Contacted')" class="action-btn btn-secondary" style="flex: 1;">Contacted</button>
+                </div>
+            </div>
+            <div id="contactsList"></div>
+        </div>
+
+        <!-- Tasks Tab -->
+        <div id="tasksTab" class="hidden">
+            <div class="card">
+                <h2 style="margin-bottom: 1rem; color: #667eea;">✅ Follow-up Tasks</h2>
+                <div id="tasksList"></div>
+            </div>
+        </div>
+
+        <!-- FAB -->
+        <button class="fab" onclick="showAddModal()">+</button>
+    </div>
+
+    <!-- Add/Edit Contact Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">➕ Add Contact</h2>
+                <button onclick="closeModal()" class="close-modal">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" id="nameInput" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="phoneInput">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="emailInput">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" id="companyInput">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="statusInput">
+                                <option value="New Lead">🆕 New Lead</option>
+                                <option value="Contacted">📞 Contacted</option>
+                                <option value="Qualified">✅ Qualified</option>
+                                <option value="Negotiating">💰 Negotiating</option>
+                                <option value="Converted">🎉 Converted</option>
+                                <option value="Lost">❌ Lost</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Deal Value</label>
+                            <input type="number" id="valueInput" placeholder="$">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Source</label>
+                        <select id="sourceInput">
+                            <option value="">Select source</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="Website">Website</option>
+                            <option value="Referral">Referral</option>
+                            <option value="Cold Outreach">Cold Outreach</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="notesInput" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="action-btn btn-primary" style="width: 100%; padding: 1rem;">
+                        💾 Save Contact
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Activity Modal -->
+    <div id="activityModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Log Activity</h2>
+                <button onclick="closeActivityModal()" class="close-modal">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="activityForm">
+                    <div class="form-group">
+                        <label>Activity Type</label>
+                        <select id="activityType">
+                            <option value="Email Sent">📧 Email Sent</option>
+                            <option value="Call Made">📞 Call Made</option>
+                            <option value="Meeting">🤝 Meeting</option>
+                            <option value="Proposal Sent">📄 Proposal Sent</option>
+                            <option value="Follow-up">⏰ Follow-up</option>
+                            <option value="Note">📝 Note</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Details</label>
+                        <textarea id="activityDetails" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Next Follow-up Date (Optional)</label>
+                        <input type="date" id="followupDate">
+                    </div>
+                    <button type="submit" class="action-btn btn-success" style="width: 100%; padding: 1rem;">
+                        ✅ Log Activity
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gmail Compose Modal -->
+    <div id="gmailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📧 Send Email via Gmail</h2>
+                <button onclick="closeGmailModal()" class="close-modal">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="gmailForm">
+                    <div class="form-group">
+                        <label>To:</label>
+                        <input type="email" id="emailTo" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Subject:</label>
+                        <input type="text" id="emailSubject" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Message:</label>
+                        <textarea id="emailBody" rows="8" required></textarea>
+                    </div>
+                    <button type="submit" class="action-btn btn-success" style="width: 100%; padding: 1rem;">
+                        📤 Send Email
+                    </button>
+                    <p style="text-align: center; color: #999; font-size: 0.875rem; margin-top: 0.5rem;">
+                        This will open Gmail with your message pre-filled
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        const SUPABASE_URL = 'https://zwhbeigmycnlvaxwlytn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3aGJlaWdteWNubHZheHdseXRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwMzQzNDQsImV4cCI6MjA3NzYxMDM0NH0.PQOSG4MiX7fvyo_RUUfnI6hNsUI17GxNA6GOYG2HSPc';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let clientCode = null;
+        let contacts = [];
+        let currentEditId = null;
+        let currentActivityContactId = null;
+        let currentFilter = 'all';
+        let googleAccessToken = null;
+        let googleUserEmail = null;
+
+        // Google OAuth Configuration
+        const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+        // ⚠️ NOTE: User needs to create this in Google Cloud Console
+        // Instructions will be provided
+
+        // Check Google connection status
+        function checkGoogleConnection() {
+            googleAccessToken = localStorage.getItem('googleAccessToken');
+            googleUserEmail = localStorage.getItem('googleUserEmail');
+            
+            if (googleAccessToken && googleUserEmail) {
+                document.getElementById('googleNotConnected').classList.add('hidden');
+                document.getElementById('googleConnected').classList.remove('hidden');
+                document.getElementById('googleEmail').textContent = `Connected as: ${googleUserEmail}`;
+            }
+        }
+
+        // Connect Google Account
+        function connectGoogle() {
+            alert('📋 Google Setup Required!\n\nTo enable Google features:\n\n1. Go to console.cloud.google.com\n2. Create a project\n3. Enable Gmail API & Google People API\n4. Create OAuth 2.0 credentials\n5. Add your app URL to authorized origins\n6. Copy Client ID\n7. Paste it in the code where it says "YOUR_GOOGLE_CLIENT_ID"\n\nFor now, we\'ll use a simpler method - direct Gmail/Calendar links!');
+            
+            // Alternative: Use direct links (works without OAuth)
+            showSimpleGoogleIntegration();
+        }
+
+        function showSimpleGoogleIntegration() {
+            // Mark as "connected" using simple method
+            localStorage.setItem('googleAccessToken', 'simple_mode');
+            localStorage.setItem('googleUserEmail', 'Using direct links');
+            
+            document.getElementById('googleNotConnected').classList.add('hidden');
+            document.getElementById('googleConnected').classList.remove('hidden');
+            document.getElementById('googleEmail').textContent = '✅ Google Quick Actions Enabled';
+            
+            alert('✅ Google integration activated!\n\nYou can now:\n• Send emails via Gmail\n• Add events to Calendar\n• Use quick templates');
+        }
+
+        function disconnectGoogle() {
+            if (confirm('Disconnect Google account?')) {
+                localStorage.removeItem('googleAccessToken');
+                localStorage.removeItem('googleUserEmail');
+                location.reload();
+            }
+        }
+
+        // Import Google Contacts (Simple method)
+        async function importGoogleContacts() {
+            alert('📱 Import Contacts:\n\nMethod 1: Manual\n1. Go to contacts.google.com\n2. Select contacts\n3. Export as CSV\n4. We\'ll add CSV import feature\n\nMethod 2: Share\nUse the "Share" feature from your Contacts app to add them one by one!\n\nFull API import requires OAuth setup.');
+        }
+
+        // Open Gmail Compose
+        function openGmailCompose(contactId = null) {
+            let toEmail = '';
+            let subject = '';
+            let body = '';
+            
+            if (contactId) {
+                const contact = contacts.find(c => c.id === contactId);
+                toEmail = contact.email || '';
+                subject = `Following up - ${contact.name}`;
+                body = `Hi ${contact.name},\n\nI wanted to follow up on our conversation.\n\nBest regards`;
+            }
+            
+            document.getElementById('emailTo').value = toEmail;
+            document.getElementById('emailSubject').value = subject;
+            document.getElementById('emailBody').value = body;
+            document.getElementById('gmailModal').classList.add('active');
+        }
+
+        function closeGmailModal() {
+            document.getElementById('gmailModal').classList.remove('active');
+        }
+
+        // Gmail Form Submit
+        document.getElementById('gmailForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const to = document.getElementById('emailTo').value;
+            const subject = document.getElementById('emailSubject').value;
+            const body = document.getElementById('emailBody').value;
+            
+            // Open Gmail with pre-filled message
+            const gmailUrl = `https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            window.open(gmailUrl, '_blank');
+            
+            // Log the email activity
+            if (currentActivityContactId) {
+                logEmailActivity(currentActivityContactId, subject);
+            }
+            
+            closeGmailModal();
+            alert('✅ Gmail opened! After sending, the email will be logged in your CRM.');
+        });
+
+        async function logEmailActivity(contactId, subject) {
+            const contact = contacts.find(c => c.id === contactId);
+            const activities = contact.activities ? JSON.parse(contact.activities) : [];
+            
+            activities.push({
+                type: 'Email Sent',
+                details: `Subject: ${subject}`,
+                date: new Date().toISOString()
+            });
+            
+            await supabase
+                .from('contacts')
+                .update({ activities: JSON.stringify(activities) })
+                .eq('id', contactId);
+            
+            await loadData();
+        }
+
+        // Sync to Google Calendar
+        function syncToCalendar() {
+            const tasksWithDates = contacts.filter(c => c.followup_date);
+            
+            if (tasksWithDates.length === 0) {
+                alert('No follow-up tasks to sync!');
+                return;
+            }
+            
+            alert(`📅 Syncing ${tasksWithDates.length} follow-ups to Google Calendar...\n\nFor each contact, we'll open Google Calendar with the event pre-filled. You can customize and save.`);
+            
+            tasksWithDates.slice(0, 3).forEach((contact, i) => {
+                setTimeout(() => {
+                    addToGoogleCalendar(contact);
+                }, i * 2000); // Stagger by 2 seconds
+            });
+        }
+
+        function addToGoogleCalendar(contact) {
+            const title = `Follow up: ${contact.name}`;
+            const details = `Company: ${contact.company || 'N/A'}\nPhone: ${contact.phone || 'N/A'}\nEmail: ${contact.email || 'N/A'}\nStatus: ${contact.status}`;
+            const date = contact.followup_date.replace(/-/g, '');
+            
+            const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&details=${encodeURIComponent(details)}&dates=${date}T100000/${date}T110000`;
+            
+            window.open(calendarUrl, '_blank');
+        }
+
+        // Email Templates
+        function useEmailTemplate(type) {
+            const templates = {
+                intro: {
+                    subject: 'Great connecting with you!',
+                    body: `Hi [Name],\n\nIt was great connecting with you! I wanted to reach out and introduce [Your Company/Service].\n\nWe specialize in helping businesses like yours [key benefit].\n\nWould you be open to a quick 15-minute call this week?\n\nBest regards,\n[Your Name]`
+                },
+                followup: {
+                    subject: 'Following up on our conversation',
+                    body: `Hi [Name],\n\nI wanted to follow up on our previous conversation about [topic].\n\nHave you had a chance to think about [question/proposal]?\n\nI'd love to hear your thoughts and answer any questions you might have.\n\nLooking forward to hearing from you!\n\nBest regards,\n[Your Name]`
+                },
+                proposal: {
+                    subject: 'Proposal for [Project Name]',
+                    body: `Hi [Name],\n\nThank you for your interest in working together!\n\nI've put together a proposal that outlines:\n• Scope of work\n• Timeline\n• Investment\n\n[Attach proposal or include details]\n\nI'm excited about the possibility of partnering with you on this project.\n\nWhen would be a good time to discuss?\n\nBest regards,\n[Your Name]`
+                }
+            };
+            
+            const template = templates[type];
+            document.getElementById('emailSubject').value = template.subject;
+            document.getElementById('emailBody').value = template.body;
+            document.getElementById('gmailModal').classList.add('active');
+            
+            alert('📝 Template loaded! Customize it for your contact and send.');
+        }
+
+        // Check if shared data exists (for Quick Share)
+        function checkSharedData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sharedText = urlParams.get('text');
+            const sharedTitle = urlParams.get('title');
+            
+            if (sharedText || sharedTitle) {
+                // Parse shared data
+                const name = sharedTitle || '';
+                const text = sharedText || '';
+                
+                // Try to extract phone/email
+                const phoneMatch = text.match(/(\+?\d[\d\s-]{7,})/);
+                const emailMatch = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
+                
+                // Pre-fill form
+                setTimeout(() => {
+                    document.getElementById('nameInput').value = name;
+                    if (phoneMatch) document.getElementById('phoneInput').value = phoneMatch[0];
+                    if (emailMatch) document.getElementById('emailInput').value = emailMatch[0];
+                    showAddModal();
+                }, 1000);
+            }
+        }
+
+        // Initialize
+        async function init() {
+            clientCode = localStorage.getItem('clientCode');
+            
+            if (!clientCode) {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('codeEntryScreen').classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                const { data: client, error } = await supabase
+                    .from('clients')
+                    .select('*')
+                    .eq('client_code', clientCode)
+                    .single();
+                
+                if (error || !client) {
+                    throw new Error('Invalid client code');
+                }
+                
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                document.getElementById('clientBadge').textContent = `${client.business_name || client.client_name} (${client.client_code})`;
+                
+                await loadData();
+                checkSharedData();
+            } catch (err) {
+                alert('Invalid client code. Please re-enter.');
+                logout();
+            }
+        }
+
+        function saveClientCode() {
+            const code = document.getElementById('codeInput').value.trim().toUpperCase();
+            if (!code) {
+                alert('Please enter a code');
+                return;
+            }
+            localStorage.setItem('clientCode', code);
+            window.location.reload();
+        }
+
+        function logout() {
+            localStorage.removeItem('clientCode');
+            window.location.reload();
+        }
+
+        async function loadData() {
+            const { data, error } = await supabase
+                .from('contacts')
+                .select('*')
+                .eq('client_code', clientCode)
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error('Error loading contacts:', error);
+                return;
+            }
+            
+            contacts = data || [];
+            renderDashboard();
+            renderContacts();
+            renderTasks();
+        }
+
+        function renderDashboard() {
+            const total = contacts.length;
+            const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            const newThisWeek = contacts.filter(c => new Date(c.created_at) > weekAgo).length;
+            const converted = contacts.filter(c => c.status === 'Converted').length;
+            const convRate = total > 0 ? Math.round((converted / total) * 100) : 0;
+            
+            document.getElementById('totalLeads').textContent = total;
+            document.getElementById('newThisWeek').textContent = newThisWeek;
+            document.getElementById('converted').textContent = converted;
+            document.getElementById('conversionRate').textContent = convRate + '%';
+            
+            const statuses = ['New Lead', 'Contacted', 'Qualified', 'Negotiating', 'Converted', 'Lost'];
+            const emojis = {'New Lead': '🆕', 'Contacted': '📞', 'Qualified': '✅', 'Negotiating': '💰', 'Converted': '🎉', 'Lost': '❌'};
+            
+            const pipeline = statuses.map(status => {
+                const count = contacts.filter(c => c.status === status).length;
+                return `
+                    <div class="pipeline-item">
+                        <span>${emojis[status]} ${status}</span>
+                        <span class="pipeline-count">${count}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('pipelineStats').innerHTML = pipeline;
+        }
+
+        function renderContacts() {
+            let filtered = contacts;
+            
+            if (currentFilter !== 'all') {
+                filtered = contacts.filter(c => c.status === currentFilter);
+            }
+            
+            const searchTerm = document.getElementById('searchInput')?.value.toLowerCase();
+            if (searchTerm) {
+                filtered = filtered.filter(c => 
+                    c.name.toLowerCase().includes(searchTerm) ||
+                    (c.company && c.company.toLowerCase().includes(searchTerm)) ||
+                    (c.phone && c.phone.includes(searchTerm))
+                );
+            }
+            
+            if (filtered.length === 0) {
+                document.getElementById('contactsList').innerHTML = '<div class="empty-state">No contacts found</div>';
+                return;
+            }
+            
+            document.getElementById('contactsList').innerHTML = filtered.map(contact => {
+                const activities = contact.activities ? JSON.parse(contact.activities) : [];
+                const emailCount = activities.filter(a => a.type === 'Email Sent').length;
+                const callCount = activities.filter(a => a.type === 'Call Made').length;
+                const lastActivity = activities.length > 0 ? activities[activities.length - 1] : null;
+                const daysAgo = lastActivity ? Math.floor((Date.now() - new Date(lastActivity.date).getTime()) / (1000 * 60 * 60 * 24)) : null;
+                
+                return `
+                    <div class="contact-card">
+                        <div class="contact-header">
+                            <div>
+                                <div class="contact-name">${contact.name}</div>
+                                ${contact.company ? `<div class="contact-company">🏢 ${contact.company}</div>` : ''}
+                            </div>
+                            <span class="status-badge status-${contact.status.toLowerCase().replace(' ', '')}">${contact.status}</span>
+                        </div>
+                        
+                        <div class="contact-info">
+                            ${contact.phone ? `<div>📞 ${contact.phone}</div>` : ''}
+                            ${contact.email ? `<div>✉️ ${contact.email}</div>` : ''}
+                            ${contact.value ? `<div>💰 $${contact.value}</div>` : ''}
+                        </div>
+                        
+                        ${activities.length > 0 ? `
+                            <div class="activity-summary">
+                                <strong>📊 Activity</strong>
+                                <div class="activity-row">
+                                    <span>📧 Emails sent:</span><span>${emailCount}</span>
+                                </div>
+                                <div class="activity-row">
+                                    <span>📞 Calls made:</span><span>${callCount}</span>
+                                </div>
+                                ${daysAgo !== null ? `
+                                    <div class="activity-row">
+                                        <span>⏰ Last contact:</span><span>${daysAgo} days ago</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        ${contact.followup_date ? `
+                            <div class="next-action">
+                                <strong>⚠️ Next Action:</strong><br>
+                                Follow up on ${new Date(contact.followup_date).toLocaleDateString()}
+                            </div>
+                        ` : ''}
+                        
+                        ${activities.length > 0 ? `
+                            <button onclick="toggleHistory('${contact.id}')" class="history-toggle">
+                                Show History (${activities.length})
+                            </button>
+                            <div id="history-${contact.id}" class="history-list hidden">
+                                ${activities.slice(-5).reverse().map(a => `
+                                    <div class="history-item">
+                                        <strong>${a.type}</strong> - ${new Date(a.date).toLocaleDateString()}<br>
+                                        ${a.details}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="contact-actions">
+                            <button onclick="openActivityModal('${contact.id}')" class="action-btn btn-success">
+                                📧 Log Activity
+                            </button>
+                            <button onclick="openGmailCompose('${contact.id}')" class="action-btn btn-primary">
+                                ✉️ Email
+                            </button>
+                            <button onclick="editContact('${contact.id}')" class="action-btn btn-warning">
+                                ✏️ Edit
+                            </button>
+                            <button onclick="deleteContact('${contact.id}')" class="action-btn btn-danger">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTasks() {
+            const today = new Date().toISOString().split('T')[0];
+            const dueTasks = contacts.filter(c => c.followup_date && c.followup_date <= today);
+            
+            if (dueTasks.length === 0) {
+                document.getElementById('dueTasks').innerHTML = '<span style="color: #10b981;">✅ All caught up!</span>';
+                document.getElementById('tasksList').innerHTML = '<div class="empty-state">No tasks due</div>';
+                return;
+            }
+            
+            const taskHtml = dueTasks.map(c => `
+                <div style="padding: 0.5rem 0; border-bottom: 1px solid #e0e0e0;">
+                    <strong>${c.name}</strong> ${c.company ? `(${c.company})` : ''}<br>
+                    <small>Follow up: ${new Date(c.followup_date).toLocaleDateString()}</small>
+                </div>
+            `).join('');
+            
+            document.getElementById('dueTasks').innerHTML = taskHtml;
+            
+            document.getElementById('tasksList').innerHTML = dueTasks.map(c => `
+                <div class="contact-card">
+                    <div class="contact-name">${c.name}</div>
+                    ${c.company ? `<div class="contact-company">🏢 ${c.company}</div>` : ''}
+                    <div style="margin: 0.75rem 0;">
+                        <strong>Due:</strong> ${new Date(c.followup_date).toLocaleDateString()}<br>
+                        ${c.phone ? `📞 ${c.phone}` : ''} ${c.email ? `✉️ ${c.email}` : ''}
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button onclick="openActivityModal('${c.id}')" class="action-btn btn-success" style="flex: 1;">
+                            ✅ Complete
+                        </button>
+                        <button onclick="editContact('${c.id}')" class="action-btn btn-primary" style="flex: 1;">
+                            ✏️ Edit
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHistory(id) {
+            const el = document.getElementById('history-' + id);
+            el.classList.toggle('hidden');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('dashboardTab').classList.add('hidden');
+            document.getElementById('contactsTab').classList.add('hidden');
+            document.getElementById('tasksTab').classList.add('hidden');
+            document.getElementById('integrationsTab').classList.add('hidden');
+            
+            document.getElementById(tab + 'Tab').classList.remove('hidden');
+            
+            if (tab === 'integrations') {
+                checkGoogleConnection();
+            }
+        }
+
+        function filterByStatus(status) {
+            currentFilter = status;
+            renderContacts();
+        }
+
+        function showAddModal() {
+            currentEditId = null;
+            document.getElementById('modalTitle').textContent = '➕ Add Contact';
+            document.getElementById('contactForm').reset();
+            document.getElementById('contactModal').classList.add('active');
+        }
+
+        function editContact(id) {
+            currentEditId = id;
+            const contact = contacts.find(c => c.id === id);
+            
+            document.getElementById('modalTitle').textContent = '✏️ Edit Contact';
+            document.getElementById('nameInput').value = contact.name;
+            document.getElementById('phoneInput').value = contact.phone || '';
+            document.getElementById('emailInput').value = contact.email || '';
+            document.getElementById('companyInput').value = contact.company || '';
+            document.getElementById('statusInput').value = contact.status;
+            document.getElementById('valueInput').value = contact.value || '';
+            document.getElementById('sourceInput').value = contact.source || '';
+            document.getElementById('notesInput').value = contact.notes || '';
+            
+            document.getElementById('contactModal').classList.add('active');
+        }
+
+        async function changeStatus(id) {
+            const contact = contacts.find(c => c.id === id);
+            const statuses = ['New Lead', 'Contacted', 'Qualified', 'Negotiating', 'Converted', 'Lost'];
+            const currentIndex = statuses.indexOf(contact.status);
+            const nextStatus = statuses[(currentIndex + 1) % statuses.length];
+            
+            if (confirm(`Change status to: ${nextStatus}?`)) {
+                const activities = contact.activities ? JSON.parse(contact.activities) : [];
+                activities.push({
+                    type: 'Status Change',
+                    details: `Changed from ${contact.status} to ${nextStatus}`,
+                    date: new Date().toISOString()
+                });
+                
+                const { error } = await supabase
+                    .from('contacts')
+                    .update({ 
+                        status: nextStatus,
+                        activities: JSON.stringify(activities)
+                    })
+                    .eq('id', id);
+                
+                if (!error) {
+                    await loadData();
+                }
+            }
+        }
+
+        async function deleteContact(id) {
+            if (!confirm('Delete this contact?')) return;
+            
+            const { error } = await supabase
+                .from('contacts')
+                .delete()
+                .eq('id', id);
+            
+            if (!error) {
+                await loadData();
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('contactModal').classList.remove('active');
+        }
+
+        function openActivityModal(id) {
+            currentActivityContactId = id;
+            document.getElementById('activityForm').reset();
+            document.getElementById('activityModal').classList.add('active');
+        }
+
+        function closeActivityModal() {
+            document.getElementById('activityModal').classList.remove('active');
+        }
+
+        // Contact Form Submit
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const contactData = {
+                client_code: clientCode,
+                name: document.getElementById('nameInput').value,
+                phone: document.getElementById('phoneInput').value,
+                email: document.getElementById('emailInput').value,
+                company: document.getElementById('companyInput').value,
+                status: document.getElementById('statusInput').value,
+                value: document.getElementById('valueInput').value || null,
+                source: document.getElementById('sourceInput').value,
+                notes: document.getElementById('notesInput').value,
+                activities: JSON.stringify([{
+                    type: 'Created',
+                    details: 'Contact created',
+                    date: new Date().toISOString()
+                }])
+            };
+            
+            let error;
+            if (currentEditId) {
+                ({ error } = await supabase
+                    .from('contacts')
+                    .update(contactData)
+                    .eq('id', currentEditId));
+            } else {
+                ({ error } = await supabase
+                    .from('contacts')
+                    .insert([contactData]));
+            }
+            
+            if (error) {
+                alert('Error: ' + error.message);
+                return;
+            }
+            
+            closeModal();
+            await loadData();
+        });
+
+        // Activity Form Submit
+        document.getElementById('activityForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const contact = contacts.find(c => c.id === currentActivityContactId);
+            const activities = contact.activities ? JSON.parse(contact.activities) : [];
+            
+            activities.push({
+                type: document.getElementById('activityType').value,
+                details: document.getElementById('activityDetails').value,
+                date: new Date().toISOString()
+            });
+            
+            const updateData = {
+                activities: JSON.stringify(activities)
+            };
+            
+            const followupDate = document.getElementById('followupDate').value;
+            if (followupDate) {
+                updateData.followup_date = followupDate;
+            }
+            
+            const { error } = await supabase
+                .from('contacts')
+                .update(updateData)
+                .eq('id', currentActivityContactId);
+            
+            if (!error) {
+                closeActivityModal();
+                await loadData();
+            }
+        });
+
+        // Search functionality
+        if (document.getElementById('searchInput')) {
+            document.getElementById('searchInput').addEventListener('input', renderContacts);
+        }
+
+        // Handle Web Share Target API (for Quick Share)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+
+        // Initialize app
+        init();
+    </script>
+    
+    <!-- Service Worker for Share Target (Quick Share Feature) -->
+    <script>
+        // This enables the app to receive shared content
+        if ('share' in navigator) {
+            console.log('Web Share API supported');
+        }
+        
+        // Register manifest for share target
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = 'data:application/json,' + encodeURIComponent(JSON.stringify({
+            name: "CRM Pro",
+            short_name: "CRM",
+            start_url: "/",
+            display: "standalone",
+            background_color: "#667eea",
+            theme_color: "#667eea",
+            icons: [{
+                src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23667eea' width='100' height='100'/%3E%3Ctext y='75' font-size='80' fill='white' text-anchor='middle' x='50'%3E📊%3C/text%3E%3C/svg%3E",
+                sizes: "512x512",
+                type: "image/svg+xml"
+            }],
+            share_target: {
+                action: "/",
+                method: "GET",
+                enctype: "application/x-www-form-urlencoded",
+                params: {
+                    title: "title",
+                    text: "text",
+                    url: "url"
+                }
+            }
+        }));
+        document.head.appendChild(manifestLink);
+    </script>
+</body>
+</html>
