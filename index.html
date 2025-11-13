@@ -10,7 +10,7 @@
 <body>
     <div id="authScreen" class="auth-screen">
         <div class="auth-card">
-            <div class="auth-icon">🔐</div>
+            <div class="auth-icon"></div>
             <h1 class="auth-title">LOCK-IN CRM</h1>
             <p class="auth-subtitle">Sign in to your account</p>
             
@@ -21,7 +21,7 @@
                 <div class="form-group">
                     <input type="password" id="loginPassword" class="form-input" placeholder="Password" required>
                 </div>
-                <button onclick="loginUser()" class="auth-btn">Sign In 🚀</button>
+                <button onclick="loginUser()" class="auth-btn">Sign In </button>
                 <p class="auth-switch">Don't have an account? <span onclick="showSignup()">Sign up</span></p>
             </div>
 
@@ -35,15 +35,48 @@
                 <div class="form-group">
                     <input type="password" id="signupPassword" class="form-input" placeholder="Password (6+ characters)" required>
                 </div>
-                <button onclick="signupUser()" class="auth-btn">Create Account 🎯</button>
+                <button onclick="signupUser()" class="auth-btn">Create Account </button>
                 <p class="auth-switch">Already have an account? <span onclick="showLogin()">Sign in</span></p>
             </div>
         </div>
     </div>
 
-    <div id="loading" class="loading-screen">
+    <div id="onboardingScreen" class="auth-screen hidden">
+        <div class="auth-card">
+            <div class="auth-icon"></div>
+            <h1 class="auth-title">Welcome to LOCK-IN</h1>
+            <p class="auth-subtitle">Tell us about your business</p>
+            
+            <form id="onboardingForm" class="auth-form">
+                <div class="form-group">
+                    <label class="form-label">Business Name</label>
+                    <input type="text" id="businessName" class="form-input" placeholder="Your Business Name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">I am a</label>
+                    <select id="userType" class="form-input" required>
+                        <option value="">Select your type</option>
+                        <option value="Freelancer">Freelancer</option>
+                        <option value="Agency Owner">Agency Owner</option>
+                        <option value="Small Business Owner">Small Business Owner</option>
+                    </select>
+                </div>
+                <button type="submit" class="auth-btn">Get Started </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="quoteScreen" class="auth-screen hidden">
+        <div class="quote-display-card">
+            <div class="quote-display-icon"></div>
+            <div class="quote-display-text" id="displayQuoteText"></div>
+            <div class="quote-display-author" id="displayQuoteAuthor"></div>
+        </div>
+    </div>
+
+    <div id="loading" class="loading-screen hidden">
         <div class="loading-content">
-            <div class="loading-icon">⚡</div>
+            <div class="loading-icon"></div>
             <div class="loading-text">Loading your empire...</div>
         </div>
     </div>
@@ -53,123 +86,168 @@
             <div class="header-content">
                 <div>
                     <div class="logo">LOCK-IN</div>
-                    <div id="userInfo" class="user-info">Loading...</div>
+                    <div id="businessNameDisplay" class="user-info">Loading...</div>
                 </div>
                 <div class="header-actions">
+                    <button onclick="showAnalytics()" class="nav-btn"> Analytics</button>
+                    <button onclick="showDashboard()" class="nav-btn"> Dashboard</button>
                     <button onclick="toggleMenu()" class="menu-btn">☰</button>
                 </div>
             </div>
         </header>
 
         <div id="dropdownMenu" class="dropdown-menu hidden">
-            <button onclick="openSettings()" class="dropdown-item">⚙️ Settings</button>
-            <button onclick="openIntegrations()" class="dropdown-item">🔗 Integrations</button>
-            <button onclick="openWinStories()" class="dropdown-item">🏆 Win Stories</button>
-            <button onclick="logout()" class="dropdown-item logout-item">🚪 Logout</button>
+            <button onclick="openSettings()" class="dropdown-item"> Settings</button>
+            <button onclick="logout()" class="dropdown-item logout-item"> Logout</button>
         </div>
 
         <div id="topBanner" class="banner">
-            <span class="banner-text">💼 NEW BIZZ UPDATE? ADD QUICKLY!</span>
+            <span class="banner-text">NEW BIZZ UPDATE? ADD QUICKLY!</span>
             <button onclick="dismissBanner()" class="banner-close">✕</button>
         </div>
 
         <main class="main-content">
             <div class="container">
-                <div class="quote-card">
-                    <div class="quote-text" id="quoteText"></div>
-                    <div class="quote-author" id="quoteAuthor"></div>
+                <div id="dashboardView">
+                    <div class="quote-card">
+                        <div class="quote-text" id="quoteText"></div>
+                        <div class="quote-author" id="quoteAuthor"></div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon"></div>
+                                <div class="stat-badge">TOTAL</div>
+                            </div>
+                            <div class="stat-value" id="totalLeads">0</div>
+                            <div class="stat-label">Total Leads</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon"></div>
+                                <div class="stat-badge">CURRENT</div>
+                            </div>
+                            <div class="stat-value" id="currentLeads">0</div>
+                            <div class="stat-label">Current Leads</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon"></div>
+                                <div class="stat-badge">CONVERTED</div>
+                            </div>
+                            <div class="stat-value" id="convertedLeads">0</div>
+                            <div class="stat-label">Leads Converted</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon"></div>
+                                <div class="stat-badge">LOST</div>
+                            </div>
+                            <div class="stat-value" id="lostLeads">0</div>
+                            <div class="stat-label">Leads Lost</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon"></div>
+                                <div class="stat-badge">REVENUE</div>
+                            </div>
+                            <div class="stat-value" id="totalRevenue">$0</div>
+                            <div class="stat-label">Total Revenue</div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title"><span>📊</span> Your Leads</h2>
+                            <button onclick="openAddLeadModal()" class="add-lead-btn">+ Add Lead</button>
+                        </div>
+                        
+                        <div class="filter-bar">
+                            <input type="text" id="searchLeads" class="form-input" placeholder=" Search leads..." 
+                                   style="flex: 1; min-width: 200px;" onkeyup="filterLeads()">
+                            <select id="filterStatus" class="form-input" style="width: 200px;" onchange="filterLeads()">
+                                <option value="">All Statuses</option>
+                                <option value="New Lead"> New Lead</option>
+                                <option value="Negotiating"> Negotiating</option>
+                                <option value="Converted"> Converted</option>
+                                <option value="Lost"> Lost</option>
+                            </select>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="leads-table">
+                                <thead>
+                                    <tr>
+                                        <th>NAME</th>
+                                        <th>EMAIL</th>
+                                        <th>PHONE</th>
+                                        <th>STATUS</th>
+                                        <th>DEAL VALUE</th>
+                                        <th>SOURCE</th>
+                                        <th>FOLLOWED UP</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leadsTableBody">
+                                    <tr>
+                                        <td colspan="7" style="text-align: center; padding: 80px 20px;">
+                                            <div style="font-size: 64px; margin-bottom: 16px;"></div>
+                                            <div style="font-size: 20px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">
+                                                Ready to lock in?
+                                            </div>
+                                            <div style="color: #aaaaaa; margin-bottom: 24px;">
+                                                Add your first lead by clicking Add Lead button
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">👥</div>
-                            <div class="stat-badge">TOTAL</div>
+                <div id="analyticsView" class="hidden">
+                    <div class="section-card">
+                        <h2 class="section-title"><span>📈</span> Business Analytics</h2>
+                        
+                        <div class="analytics-grid">
+                            <div class="analytics-card">
+                                <div class="analytics-label">Total Leads</div>
+                                <div class="analytics-value" id="analyticsTotal">0</div>
+                            </div>
+                            <div class="analytics-card">
+                                <div class="analytics-label">Converted</div>
+                                <div class="analytics-value" id="analyticsConverted">0</div>
+                            </div>
+                            <div class="analytics-card">
+                                <div class="analytics-label">Lost</div>
+                                <div class="analytics-value" id="analyticsLost">0</div>
+                            </div>
+                            <div class="analytics-card">
+                                <div class="analytics-label">Negotiating</div>
+                                <div class="analytics-value" id="analyticsNegotiating">0</div>
+                            </div>
+                            <div class="analytics-card">
+                                <div class="analytics-label">New Leads</div>
+                                <div class="analytics-value" id="analyticsNew">0</div>
+                            </div>
+                            <div class="analytics-card">
+                                <div class="analytics-label">Follow-up Rate</div>
+                                <div class="analytics-value" id="analyticsFollowUp">0%</div>
+                            </div>
                         </div>
-                        <div class="stat-value" id="totalLeads">0</div>
-                        <div class="stat-label">Total Leads</div>
-                    </div>
 
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">🆕</div>
-                            <div class="stat-badge">WEEK</div>
+                        <div class="chart-container">
+                            <canvas id="leadsChart"></canvas>
                         </div>
-                        <div class="stat-value" id="newThisWeek">0</div>
-                        <div class="stat-label">Leads This Week</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">💰</div>
-                            <div class="stat-badge">REVENUE</div>
-                        </div>
-                        <div class="stat-value" id="totalRevenue">$0</div>
-                        <div class="stat-label">Total Revenue</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon">🎯</div>
-                            <div class="stat-badge">WIN RATE</div>
-                        </div>
-                        <div class="stat-value" id="conversionRate">0%</div>
-                        <div class="stat-label">Conversion Rate</div>
-                    </div>
-                </div>
-
-                <div id="followUpAlerts" class="follow-up-alerts"></div>
-
-                <div class="section-card">
-                    <h2 class="section-title"><span>📊</span> Your Leads</h2>
-                    
-                    <div class="filter-bar">
-                        <input type="text" id="searchLeads" class="form-input" placeholder="🔍 Search leads..." 
-                               style="flex: 1; min-width: 200px;" onkeyup="filterLeads()">
-                        <select id="filterStatus" class="form-input" style="width: 200px;" onchange="filterLeads()">
-                            <option value="">All Statuses</option>
-                            <option value="New Lead">🆕 New Lead</option>
-                            <option value="Contacted">📞 Contacted</option>
-                            <option value="Qualified">✅ Qualified</option>
-                            <option value="Negotiating">💰 Negotiating</option>
-                            <option value="Converted">🎉 Converted</option>
-                            <option value="Lost">❌ Lost</option>
-                        </select>
-                    </div>
-
-                    <div class="table-container">
-                        <table class="leads-table">
-                            <thead>
-                                <tr>
-                                    <th>NAME</th>
-                                    <th>EMAIL</th>
-                                    <th>PHONE</th>
-                                    <th>COMPANY</th>
-                                    <th>STATUS</th>
-                                    <th>VALUE</th>
-                                    <th>FOLLOW-UP</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leadsTableBody">
-                                <tr>
-                                    <td colspan="7" style="text-align: center; padding: 80px 20px;">
-                                        <div style="font-size: 64px; margin-bottom: 16px;">🚀</div>
-                                        <div style="font-size: 20px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">
-                                            Ready to lock in?
-                                        </div>
-                                        <div style="color: #aaaaaa; margin-bottom: 24px;">
-                                            Add your first lead by tapping the + button
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
         </main>
-
-        <button onclick="openAddLeadModal()" class="fab">+</button>
     </div>
 
     <div id="contactModal" class="modal-backdrop hidden">
@@ -186,33 +264,27 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Phone</label>
-                            <input type="tel" id="phoneInput" class="form-input">
-                        </div>
-                        <div class="form-group">
                             <label class="form-label">Email</label>
                             <input type="email" id="emailInput" class="form-input">
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Company</label>
-                        <input type="text" id="companyInput" class="form-input">
+                        <div class="form-group">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" id="phoneInput" class="form-input">
+                        </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Status</label>
                             <select id="statusInput" class="form-input">
-                                <option value="New Lead">🆕 New Lead</option>
-                                <option value="Contacted">📞 Contacted</option>
-                                <option value="Qualified">✅ Qualified</option>
-                                <option value="Negotiating">💰 Negotiating</option>
-                                <option value="Converted">🎉 Converted</option>
-                                <option value="Lost">❌ Lost</option>
+                                <option value="New Lead"> New Lead</option>
+                                <option value="Negotiating"> Negotiating</option>
+                                <option value="Converted"> Converted</option>
+                                <option value="Lost"> Lost</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Deal Value</label>
-                            <input type="number" id="valueInput" class="form-input" placeholder="0">
+                            <input type="number" id="dealInput" class="form-input" placeholder="0">
                         </div>
                     </div>
                     <div class="form-group">
@@ -228,12 +300,11 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Follow-up Date</label>
-                        <input type="date" id="followupInput" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Notes</label>
-                        <textarea id="notesInput" class="form-input"></textarea>
+                        <label class="form-label">Followed Up</label>
+                        <select id="followedUpInput" class="form-input">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
                     </div>
                     <div class="modal-actions">
                         <button type="submit" class="add-btn" style="flex: 1;">Save Lead</button>
@@ -244,40 +315,10 @@
         </div>
     </div>
 
-    <div id="winStoriesModal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">🏆 Win Stories</h2>
-                <button onclick="closeWinStoriesModal()" class="modal-close">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="win-story-form">
-                    <div class="form-group">
-                        <label class="form-label">Deal/Client Name</label>
-                        <input type="text" id="winStoryName" class="form-input" placeholder="John Doe - Website Project">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Deal Value</label>
-                        <input type="number" id="winStoryValue" class="form-input" placeholder="5000">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">What Worked? (Your winning strategy)</label>
-                        <textarea id="winStoryDetails" class="form-input" rows="5" placeholder="Quick response time, personalized proposal, great rapport on the call..."></textarea>
-                    </div>
-                    <button onclick="saveWinStory()" class="add-btn">💾 Save Win Story</button>
-                </div>
-                
-                <div class="win-stories-list" id="winStoriesList">
-                    <h3 style="margin: 32px 0 16px 0; color: #aaaaaa; font-size: 14px; text-transform: uppercase;">Your Wins 🎉</h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="settingsModal" class="modal-backdrop hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">⚙️ Settings</h2>
+                <h2 class="modal-title"> Settings</h2>
                 <button onclick="closeSettingsModal()" class="modal-close">✕</button>
             </div>
             <div class="modal-body">
@@ -291,68 +332,33 @@
                     </div>
                     <div class="settings-item">
                         <div>
-                            <div class="settings-label">Name</div>
-                            <div class="settings-value" id="settingsName">Loading...</div>
+                            <div class="settings-label">Business Name</div>
+                            <div class="settings-value" id="settingsBusinessName">Loading...</div>
                         </div>
                     </div>
-                </div>
-
-                <div class="settings-section">
-                    <h3 class="settings-title">Notifications</h3>
                     <div class="settings-item">
                         <div>
-                            <div class="settings-label">Follow-up Reminders</div>
-                            <div class="settings-desc">Get notified about upcoming follow-ups</div>
+                            <div class="settings-label">User Type</div>
+                            <div class="settings-value" id="settingsUserType">Loading...</div>
                         </div>
-                        <label class="toggle">
-                            <input type="checkbox" id="notificationsToggle" onchange="toggleNotifications()">
-                            <span class="toggle-slider"></span>
-                        </label>
                     </div>
                 </div>
 
                 <div class="settings-section">
-                    <h3 class="settings-title">Data</h3>
-                    <button onclick="exportData()" class="settings-btn">📥 Export All Data (CSV)</button>
+                    <h3 class="settings-title">Integrations</h3>
+                    <button onclick="googleToolsPlaceholder()" class="settings-btn"> Connect Google Tools</button>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-title">Subscription</h3>
+                    <button onclick="subscribePlaceholder()" class="settings-btn"> Subscribe to Premium</button>
+                    <p class="settings-desc">Free plan: Limited to 3 leads</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="integrationsModal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">🔗 Integrations</h2>
-                <button onclick="closeIntegrationsModal()" class="modal-close">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="integration-card">
-                    <div class="integration-icon">📧</div>
-                    <div class="integration-info">
-                        <h3>Google Account</h3>
-                        <p>Connect Gmail, Calendar, and Contacts</p>
-                    </div>
-                    <button onclick="connectGoogle()" class="integration-btn" id="googleConnectBtn">Connect</button>
-                </div>
-
-                <div id="googleConnected" class="hidden" style="margin-top: 24px;">
-                    <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                        <div style="color: #22c55e; font-weight: 600; margin-bottom: 8px;">✅ Connected</div>
-                        <div style="color: #aaaaaa; font-size: 14px;" id="googleEmail">Loading...</div>
-                    </div>
-                    
-                    <div style="display: grid; gap: 12px;">
-                        <button onclick="syncGoogleCalendar()" class="add-btn">📅 Sync Follow-ups to Calendar</button>
-                        <button onclick="disconnectGoogle()" class="add-btn btn-danger">🔌 Disconnect</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
