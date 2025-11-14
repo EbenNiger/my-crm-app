@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyD-5KD1mpt-EQnWcXG9w83CW2L0HJrGIDY",
@@ -17,23 +17,6 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-
-const auth = getAuth();
-
-// This runs every time the user logs in or opens the app
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // User is logged in
-    document.getElementById("loginForm").style.display = "none"; // Hide login
-    document.getElementById("dashboard").style.display = "block"; // Show dashboard
-  } else {
-    // User is NOT logged in
-    document.getElementById("loginForm").style.display = "block"; // Show login
-    document.getElementById("dashboard").style.display = "none"; // Hide dashboard
-  }
-});
 
 let currentUser = null;
 let userData = null;
@@ -107,17 +90,18 @@ window.signupUser = async function() {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         
-        await addDoc(collection(db, 'users'), {
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
             uid: userCredential.user.uid,
             name: name,
             email: email,
             isSubscribed: false,
             onboarded: false,
-            createdAt: serverTimestamp()
+            createdAt: new Date().toISOString()
         });
 
-        showToast('Account created successfully! 🎉', 'success');
+        showToast('Account created! 🎉', 'success');
     } catch (error) {
+        console.error('Signup error:', error);
         if (error.code === 'auth/email-already-in-use') {
             showToast('Email already in use', 'error');
         } else if (error.code === 'auth/invalid-email') {
@@ -143,7 +127,8 @@ window.loginUser = async function() {
         await signInWithEmailAndPassword(auth, email, password);
         showToast('Welcome back! 🚀', 'success');
     } catch (error) {
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        console.error('Login error:', error);
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             showToast('Invalid email or password', 'error');
         } else if (error.code === 'auth/invalid-email') {
             showToast('Invalid email address', 'error');
@@ -155,23 +140,51 @@ window.loginUser = async function() {
 
 window.logout = function() {
     signOut(auth);
+    location.reload();
 }
 
 onAuthStateChanged(auth, async (user) => {
+    console.log('Auth state changed:', user);
+    
     if (user) {
         currentUser = user;
+        document.getElementById('loading').classList.remove('hidden');
         
-        const userQuery = query(collection(db, 'users'), where('uid', '==', user.uid));
-        const userSnapshot = await getDocs(userQuery);
-        
-        if (!userSnapshot.empty) {
-            userData = { id: userSnapshot.docs[0].id, ...userSnapshot.docs[0].data() };
+        try {
+            const userDocRef = doc(db, 'users', user.uid);
+            const userDocSnap = await getDocs(query(collection(db, 'users'), where('uid', '==', user.uid)));
+            
+            if (!userDocSnap.empty) {
+                userData = { id: userDocSnap.docs[0].id, ...userDocSnap.docs[0].data() };
+            } else {
+                await setDoc(userDocRef, {
+                    uid: user.uid,
+                    email: user.email,
+                    isSubscribed: false,
+                    onboarded: false,
+                    createdAt: new Date().toISOString()
+                });
+                
+                userData = {
+                    id: user.uid,
+                    uid: user.uid,
+                    email: user.email,
+                    isSubscribed: false,
+                    onboarded: false
+                };
+            }
+            
+            console.log('User data:', userData);
             
             if (!userData.onboarded) {
                 showOnboarding();
             } else {
                 showQuoteScreen();
             }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            showToast('Error loading user data', 'error');
+            document.getElementById('loading').classList.add('hidden');
         }
     } else {
         currentUser = null;
@@ -204,7 +217,8 @@ document.getElementById('onboardingForm').addEventListener('submit', async (e) =
     }
     
     try {
-        await updateDoc(doc(db, 'users', userData.id), {
+        const userDocRef = doc(db, 'users', userData.id);
+        await updateDoc(userDocRef, {
             businessName: businessName,
             userType: userType,
             onboarded: true
@@ -216,6 +230,7 @@ document.getElementById('onboardingForm').addEventListener('submit', async (e) =
         
         showQuoteScreen();
     } catch (error) {
+        console.error('Onboarding error:', error);
         showToast('Error: ' + error.message, 'error');
     }
 });
@@ -293,17 +308,20 @@ document.addEventListener('click', (e) => {
 
 async function loadLeads() {
     try {
-        const leadsQuery = query(
-            collection(db, 'leads'), 
-            where('userId', '==', currentUser.uid),
-            orderBy('createdAt', 'desc')
-        );
+        const leadsQuery = query(collection(db, 'leads'), where('userId', '==', currentUser.uid));
         const leadsSnapshot = await getDocs(leadsQuery);
         leads = leadsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        leads.sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+            const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+            return dateB - dateA;
+        });
         
         updateDashboard();
         renderLeadsTable();
     } catch (error) {
+        console.error('Error loading leads:', error);
         showToast('Error loading leads', 'error');
     }
 }
@@ -452,22 +470,23 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
         deal: document.getElementById('dealInput').value || '0',
         source: document.getElementById('sourceInput').value,
         followedUp: document.getElementById('followedUpInput').value,
-        updatedAt: serverTimestamp()
+        updatedAt: new Date().toISOString()
     };
     
     try {
         if (currentEditId) {
             await updateDoc(doc(db, 'leads', currentEditId), leadData);
-            showToast(' Lead updated', 'success');
+            showToast('✅ Lead updated', 'success');
         } else {
-            leadData.createdAt = serverTimestamp();
+            leadData.createdAt = new Date().toISOString();
             await addDoc(collection(db, 'leads'), leadData);
-            showToast(' Lead added', 'success');
+            showToast('✅ Lead added', 'success');
         }
         
         closeContactModal();
         await loadLeads();
     } catch (error) {
+        console.error('Error saving lead:', error);
         showToast('Error: ' + error.message, 'error');
     }
 });
@@ -481,10 +500,11 @@ window.deleteContact = async function() {
     
     try {
         await deleteDoc(doc(db, 'leads', currentEditId));
-        showToast(' Lead deleted', 'success');
+        showToast('✅ Lead deleted', 'success');
         closeContactModal();
         await loadLeads();
     } catch (error) {
+        console.error('Error deleting lead:', error);
         showToast('Error deleting lead', 'error');
     }
 }
