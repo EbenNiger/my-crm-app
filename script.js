@@ -18,6 +18,23 @@ const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+
+const auth = getAuth();
+
+// This runs every time the user logs in or opens the app
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User is logged in
+    document.getElementById("loginForm").style.display = "none"; // Hide login
+    document.getElementById("dashboard").style.display = "block"; // Show dashboard
+  } else {
+    // User is NOT logged in
+    document.getElementById("loginForm").style.display = "block"; // Show login
+    document.getElementById("dashboard").style.display = "none"; // Hide dashboard
+  }
+});
+
 let currentUser = null;
 let userData = null;
 let leads = [];
