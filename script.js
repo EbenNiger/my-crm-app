@@ -303,9 +303,16 @@ document.addEventListener('click', (e) => {
 
 async function loadLeads() {
     try {
-        const leadsQuery = query(collection(db, 'leads'), where('userId', '==', currentUser.uid));
-        const leadsSnapshot = await getDocs(leadsQuery);
-        leads = leadsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const leadsRef = collection(db, 'leads');
+        const allLeadsSnapshot = await getDocs(leadsRef);
+        
+        leads = [];
+        allLeadsSnapshot.forEach((doc) => {
+            const leadData = doc.data();
+            if (leadData.userId === currentUser.uid) {
+                leads.push({ id: doc.id, ...leadData });
+            }
+        });
         
         leads.sort((a, b) => {
             const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
@@ -316,10 +323,10 @@ async function loadLeads() {
         updateDashboard();
         renderLeadsTable();
     } catch (error) {
-        showToast('Error loading leads', 'error');
+        console.error('Load leads error:', error);
+        showToast('Error loading leads: ' + error.message, 'error');
     }
 }
-
 function updateDashboard() {
     const total = leads.length;
     const current = leads.filter(l => l.status === 'New Lead' || l.status === 'Negotiating').length;
